@@ -13,7 +13,10 @@ export interface Blog {
   tags?: string[]; 
 }
 
-const RAW_URL = import.meta.env.VITE_API_URL || 'https://api.scgbsolutions.com';
+// In dev, use relative URLs so requests go through the Vite proxy (see vite.config.ts)
+const RAW_URL = import.meta.env.DEV ? '' : (import.meta.env.VITE_API_URL || 'https://api.manhoursonhire.com');
+// Must match the blog's `targetWebsites` value in the CMS
+const SITE_KEY = 'founderscounsel';
 const SERVER_URL = RAW_URL.replace(/\/+$/, '');
 const endpoint = SERVER_URL.endsWith('/api') ? '/blogs' : '/api/blogs';
 
@@ -24,7 +27,7 @@ const BlogArchive = () => {
 
   useEffect(() => {
     const fetchBlogs = async () => {
-      const fullUrl = `${SERVER_URL}${endpoint}?site=Founders Counsel`;
+      const fullUrl = `${SERVER_URL}${endpoint}?site=${SITE_KEY}`;
       
       try {
         setLoading(true);

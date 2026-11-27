@@ -29,7 +29,8 @@ interface Blog extends BaseBlog {
   metaDescription?: string;
 }
 
-const RAW_URL = import.meta.env.VITE_API_URL || 'https://api.manhoursonhire.com';
+// In dev, use relative URLs so requests go through the Vite proxy (see vite.config.ts)
+const RAW_URL = import.meta.env.DEV ? '' : (import.meta.env.VITE_API_URL || 'https://api.manhoursonhire.com');
 const SERVER_URL = RAW_URL.replace(/\/+$/, '');
 
 const BlogSingle = () => {
