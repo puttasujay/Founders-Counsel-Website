@@ -452,13 +452,15 @@ const BlogSingle = () => {
             </span>
           </div>
 
-          <div className="rounded-[2.5rem] overflow-hidden shadow-2xl shadow-[#DCA825]/10 relative group border border-white max-w-full">
-            <img 
-              src={blog.featuredImage} 
-              alt={blog.title} 
-              className="w-full max-w-full block h-auto object-cover group-hover:scale-105 transition-transform duration-700" 
-            />
-          </div>
+          {blog.featuredImage?.trim() && (
+            <div className="rounded-[2.5rem] overflow-hidden shadow-2xl shadow-[#DCA825]/10 relative group border border-white max-w-full">
+              <img
+                src={blog.featuredImage}
+                alt={blog.title}
+                className="w-full max-w-full block h-auto object-cover group-hover:scale-105 transition-transform duration-700"
+              />
+            </div>
+          )}
 
           <div className="fixed bottom-0 left-0 w-full max-w-full p-4 rounded-t-[2.5rem] bg-transparent z-50 flex justify-center xl:relative xl:bottom-auto xl:left-auto xl:p-0 xl:bg-transparent xl:z-10 xl:rounded-none">
             <div className="w-[85%] xl:w-full min-w-0 max-w-full">

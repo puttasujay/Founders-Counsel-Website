@@ -17,6 +17,7 @@ export interface Blog {
 const RAW_URL = import.meta.env.DEV ? '' : (import.meta.env.VITE_API_URL || 'https://api.manhoursonhire.com');
 // Must match the blog's `targetWebsites` value in the CMS
 const SITE_KEY = 'founderscounsel';
+const PAGE_SIZE = 27;
 const SERVER_URL = RAW_URL.replace(/\/+$/, '');
 const endpoint = SERVER_URL.endsWith('/api') ? '/blogs' : '/api/blogs';
 
@@ -24,6 +25,15 @@ const BlogArchive = () => {
   const [blogs, setBlogs] = useState<Blog[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+
+  const totalPages = Math.ceil(blogs.length / PAGE_SIZE);
+  const visibleBlogs = blogs.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+
+  const goToPage = (page: number) => {
+    setCurrentPage(Math.min(Math.max(page, 1), totalPages));
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   useEffect(() => {
     const fetchBlogs = async () => {
@@ -102,23 +112,27 @@ const BlogArchive = () => {
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
           {blogs.length > 0 ? (
-            blogs.map((blog) => (
-              <Link 
+            visibleBlogs.map((blog) => {
+              const hasImage = Boolean(blog.featuredImage?.trim());
+              return (
+              <Link
                 to={`/blogs/${blog.slug || blog._id}`} 
                 key={blog._id} 
                 className="group flex flex-col bg-white/5 backdrop-blur-md border border-white/10 rounded-[2rem] overflow-hidden hover:shadow-2xl hover:shadow-[#DCA825]/10 transition-all duration-700 ease-out hover:-translate-y-2 hover:border-white/20"
               >
                 {/* Image Container */}
                 <div className="relative aspect-[4/3] overflow-hidden m-3 rounded-[1.5rem]">
-                  {blog.featuredImage ? (
-                    <img 
-                      src={blog.featuredImage} 
-                      alt={blog.title} 
+                  {hasImage ? (
+                    <img
+                      src={blog.featuredImage}
+                      alt={blog.title}
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000 ease-in-out"
                     />
                   ) : (
-                    <div className="flex items-center justify-center h-full bg-white/5 text-white/20 italic text-xs uppercase tracking-widest">
-                      No Preview
+                    <div className="relative flex items-center justify-center h-full p-8 bg-gradient-to-br from-[#1C1454] via-[#110B38] to-[#2A1F6B] border border-[#DCA825]/20 rounded-[1.5rem] group-hover:scale-105 transition-transform duration-1000 ease-in-out">
+                      <h3 className="text-2xl md:text-[1.65rem] font-black text-white text-center leading-[1.25] tracking-tight line-clamp-4 group-hover:text-[#DCA825] transition-colors duration-300">
+                        {blog.title}
+                      </h3>
                     </div>
                   )}
                   {/* Subtle overlay on hover */}
@@ -129,23 +143,20 @@ const BlogArchive = () => {
                 <div className="p-6 pt-2 flex flex-col flex-grow">
                   <p className="text-[10px] text-[#DCA825] font-bold tracking-widest uppercase mb-3 flex items-center gap-2">
                     <span className="w-1 h-1 bg-[#DCA825] rounded-full"></span>
-                    {new Date(blog.createdAt).toLocaleDateString('en-US', {
-                      month: 'long', day: 'numeric', year: 'numeric'
-                    })}
+                    {formatDate(blog.createdAt)}
                   </p>
                   <h3 className="text-xl font-bold text-white line-clamp-2 group-hover:text-[#DCA825] transition-colors duration-300 leading-[1.3] mb-4">
                     {blog.title}
                   </h3>
-                  
+
                   <div className="mt-auto pt-4 flex items-center text-[10px] font-black uppercase tracking-[0.2em] text-[#DCA825]">
-                    Read Article 
-                    <svg className="w-4 h-4 ml-1 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                    </svg>
+                    Read Article
+                    <ArrowIcon />
                   </div>
                 </div>
               </Link>
-            ))
+              );
+            })
           ) : (
             <div className="text-center col-span-full py-20 flex justify-center">
               <div className="bg-white/5 backdrop-blur-md px-10 py-6 rounded-3xl border border-white/10 shadow-sm">
@@ -156,9 +167,51 @@ const BlogArchive = () => {
             </div>
           )}
         </div>
+
+        {totalPages > 1 && (
+          <nav className="mt-16 flex items-center justify-center gap-2 flex-wrap" aria-label="Pagination">
+            <button
+              onClick={() => goToPage(currentPage - 1)}
+              disabled={currentPage === 1}
+              className="px-4 h-10 rounded-full border border-white/10 bg-white/5 text-[10px] font-black uppercase tracking-[0.2em] text-[#DCA825] hover:border-[#DCA825]/50 disabled:opacity-30 disabled:pointer-events-none transition-colors"
+            >
+              Prev
+            </button>
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+              <button
+                key={page}
+                onClick={() => goToPage(page)}
+                aria-current={page === currentPage ? 'page' : undefined}
+                className={`w-10 h-10 rounded-full text-sm font-bold transition-colors ${
+                  page === currentPage
+                    ? 'bg-[#DCA825] text-[#110B38]'
+                    : 'border border-white/10 bg-white/5 text-white/70 hover:border-[#DCA825]/50 hover:text-[#DCA825]'
+                }`}
+              >
+                {page}
+              </button>
+            ))}
+            <button
+              onClick={() => goToPage(currentPage + 1)}
+              disabled={currentPage === totalPages}
+              className="px-4 h-10 rounded-full border border-white/10 bg-white/5 text-[10px] font-black uppercase tracking-[0.2em] text-[#DCA825] hover:border-[#DCA825]/50 disabled:opacity-30 disabled:pointer-events-none transition-colors"
+            >
+              Next
+            </button>
+          </nav>
+        )}
       </div>
     </section>
   );
 };
+
+const formatDate = (date: string) =>
+  new Date(date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+
+const ArrowIcon = () => (
+  <svg className="w-4 h-4 ml-1 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+  </svg>
+);
 
 export default BlogArchive;
