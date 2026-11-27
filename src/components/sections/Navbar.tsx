@@ -12,9 +12,6 @@ export default function Navbar(): JSX.Element {
     window.scrollTo(0, 0);
   };
 
-  // LOGO COLORS: 
-  // Navy: #0E0B42
-  // Gold: #C4912A
 
   const isActive = (path: string): string =>
     location.pathname === path
@@ -119,7 +116,7 @@ export default function Navbar(): JSX.Element {
           </Link>
 
           <Link
-            to="/insights"
+            to="/blogs"
             className={`${navLinkStyle} ${isActive("/insights")}`}
             onClick={handleNavClick}
           >

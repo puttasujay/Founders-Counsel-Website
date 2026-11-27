@@ -13,7 +13,7 @@ export interface Blog {
   tags?: string[]; 
 }
 
-const RAW_URL = import.meta.env.VITE_API_URL || 'https://api.manhoursonhire.com';
+const RAW_URL = import.meta.env.VITE_API_URL || 'https://api.scgbsolutions.com';
 const SERVER_URL = RAW_URL.replace(/\/+$/, '');
 const endpoint = SERVER_URL.endsWith('/api') ? '/blogs' : '/api/blogs';
 
